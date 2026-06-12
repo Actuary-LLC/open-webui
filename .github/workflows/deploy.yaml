@@ -1,0 +1,24 @@
+name: 'Deploy'
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  checkout-repository:
+    runs-on: [DEVICE]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: 'Actuary-LLC/[REPO]'
+          ref: 'main'       
+  deploy-task:
+    needs: checkout-repository
+    runs-on: [DEVICE]
+    env:
+      TAG: ${{ github.sha }}
+    steps:
+      - run: | 
+          docker stack deploy -c [SERVICE].yaml [STACK]
