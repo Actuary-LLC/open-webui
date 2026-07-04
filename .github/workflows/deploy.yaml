@@ -5,20 +5,96 @@ on:
     branches:
       - main
 
+jobs:name: Deploy Open WebUI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "stacks/open-webui/**"
+
+env:
+  STACK_NAME: litellm
+  SECRETS_PREFIX: openwebui_env
+
 jobs:
+  deploy:
+    runs-on: coral
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Versioned secret name
+        id: ver
+        run: |
+          SHA="${GITHUB_SHA::7}"
+          echo "name=${SECRETS_PREFIX}_${SHA}" >> "$GITHUB_OUTPUT"
+
+      # ── Write secrets file directly, no template needed ──
+      - name: Create Docker secret
+        env:
+          OPENAI_API_KEY: ${{ secrets.LITELLM_MASTER_KEY }}
+          OAUTH_CLIENT_ID: ${{ vars.OAUTH_CLIENT_ID }}
+          OAUTH_CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}
+        run: |
+          cat <<EOF > /tmp/secrets.env
+          OPENAI_API_KEY=${LITELLM_MASTER_KEY}
+          OAUTH_CLIENT_ID=${GOOGLE_OAUTH_ID}
+          OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_SECRET}
+          EOF
+
+          docker secret create \
+            "${{ steps.ver.outputs.name }}" \
+            /tmp/secrets.env 2>/dev/null || true
+
+          shred -u /tmp/secrets.env
+
+      - name: Deploy
+        run: |
+          sed -i "s/open_webui_/${{ steps.ver.outputs.name }}/g" \
+            stacks/open-webui/docker-stack.yml
+
+          docker stack deploy \
+            -c stacks/open-webui/docker-stack.yml \
+            "$STACK_NAME"
+
+      - name: Wait for convergence
+        run: |
+          for i in $(seq 1 30); do
+            REPLICAS=$(docker service ls \
+              --filter "name=${STACK_NAME}_open-webui" \
+              --format "{{.Replicas}}")
+            [ "$REPLICAS" = "1/1" ] && exit 0
+            sleep 5
+          done
+          docker service rollback "${STACK_NAME}_open-webui"
+          exit 1
+
+      - name: Prune old secrets
+        if: always()
+        run: |
+          docker secret ls \
+            --filter "name=${SECRETS_PREFIX}_" \
+            --format "{{.ID}} {{.CreatedAt}}" \
+          | sort -k2 -r \
+          | tail -n +3 \
+          | awk '{print $1}' \
+          | while read -r id; do
+              docker secret rm "$id" 2>/dev/null || true
+            done
   checkout-repository:
-    runs-on: [DEVICE]
+    runs-on: coral
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          repository: 'Actuary-LLC/[REPO]'
+          repository: 'Actuary-LLC/open-webui'
           ref: 'main'       
   deploy-task:
     needs: checkout-repository
-    runs-on: [DEVICE]
+    runs-on: coral
     env:
       TAG: ${{ github.sha }}
     steps:
       - run: | 
-          docker stack deploy -c [SERVICE].yaml [STACK]
+          docker stack deploy -c service.yaml litellm
