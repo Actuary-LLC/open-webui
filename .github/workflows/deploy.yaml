@@ -4,11 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - "stacks/open-webui/**"
+      - "open-webui.yaml"
+      - ".github/workflows/deploy.yaml"
 
 env:
-  STACK_NAME: litellm
-  SECRETS_PREFIX: openwebui_env
+  STACK_NAME: openwebui
+  SERVICE_NAME: openwebui_main   
+  SECRETS_PREFIX: open_webui  
 
 jobs:
   deploy:
@@ -23,7 +25,7 @@ jobs:
           SHA="${GITHUB_SHA::7}"
           echo "name=${SECRETS_PREFIX}_${SHA}" >> "$GITHUB_OUTPUT"
 
-      # ── Write secrets file directly, no template needed ──
+      # ── Create the Docker secret ──
       - name: Create Docker secret
         env:
           OPENAI_API_KEY: ${{ secrets.LITELLM_MASTER_KEY }}
@@ -31,10 +33,11 @@ jobs:
           OAUTH_CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}
         run: |
           cat <<EOF > /tmp/secrets.env
-          OPENAI_API_KEY=${LITELLM_MASTER_KEY}
-          OAUTH_CLIENT_ID=${GOOGLE_OAUTH_ID}
-          OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_SECRET}
+          OPENAI_API_KEY=${OPENAI_API_KEY}
+          OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}
+          OAUTH_CLIENT_SECRET=${OAUTH_CLIENT_SECRET}
           EOF
+          sed -i 's/^[[:space:]]*//' /tmp/secrets.env
 
           docker secret create \
             "${{ steps.ver.outputs.name }}" \
@@ -42,27 +45,35 @@ jobs:
 
           shred -u /tmp/secrets.env
 
-      - name: Deploy
+      # ── Deploy ──
+      # Uses "docker stack deploy" which handles both:
+      #   - First deploy (service doesn't exist yet)
+      #   - Updates (service already running)
+      # The sed replaces the placeholder secret name in the yaml
+      # with the versioned one we just created.
+      - name: Deploy stack
         run: |
-          sed -i "s/open_webui_/${{ steps.ver.outputs.name }}/g" \
-            stacks/open-webui/docker-stack.yml
+          sed -i "s/open_webui/${{ steps.ver.outputs.name }}/g" \
+            open-webui.yaml
 
           docker stack deploy \
-            -c stacks/open-webui/docker-stack.yml \
+            -c open-webui.yaml \
             "$STACK_NAME"
-
+      # ── Wait ──
       - name: Wait for convergence
         run: |
           for i in $(seq 1 30); do
             REPLICAS=$(docker service ls \
-              --filter "name=${STACK_NAME}_open-webui" \
+              --filter "name=${SERVICE_NAME}" \
               --format "{{.Replicas}}")
-            [ "$REPLICAS" = "1/1" ] && exit 0
+            [ "$REPLICAS" = "1/1" ] && echo "✅ Done" && exit 0
+            echo "Waiting... ($i/30) — $REPLICAS"
             sleep 5
           done
-          docker service rollback "${STACK_NAME}_open-webui"
+          docker service rollback "$SERVICE_NAME"
           exit 1
 
+      # ── Prune ──
       - name: Prune old secrets
         if: always()
         run: |
