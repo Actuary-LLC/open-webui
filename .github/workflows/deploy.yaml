@@ -1,11 +1,4 @@
-name: 'Deploy'
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-
-jobs:name: Deploy Open WebUI
+name: Deploy Open WebUI
 
 on:
   push:
