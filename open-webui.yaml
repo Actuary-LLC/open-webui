@@ -9,7 +9,7 @@ networks:
     external: true
 
 services:
-  open-webui:
+  main:
     image: ghcr.io/open-webui/open-webui:0.9.6
     networks:
       - reverse-proxy
@@ -31,7 +31,7 @@ services:
     secrets:
       - open_webui
     environment:
-      - OPENAI_API_BASE_URL=http://litellm:4000
+      - OPENAI_API_BASE_URL=http://litellm_main:4000
       - OAUTH_PROVIDER_NAME=authentik
       - OPENID_PROVIDER_URL=https://authentik.actuary.dev/application/o/openweb-ui/.well-known/openid-configuration
       - OPENID_REDIRECT_URI=https://openwebui.actuary.dev/oauth/oidc/callback
