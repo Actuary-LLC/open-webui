@@ -75,19 +75,3 @@ jobs:
           | while read -r id; do
               docker secret rm "$id" 2>/dev/null || true
             done
-  checkout-repository:
-    runs-on: coral
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          repository: 'Actuary-LLC/open-webui'
-          ref: 'main'       
-  deploy-task:
-    needs: checkout-repository
-    runs-on: coral
-    env:
-      TAG: ${{ github.sha }}
-    steps:
-      - run: | 
-          docker stack deploy -c service.yaml litellm
