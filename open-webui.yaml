@@ -27,8 +27,6 @@ services:
         parallelism: 1
         failure_action: rollback
         delay: 10s
-    secrets:
-      - open_webui
     environment:
       - OPENAI_API_BASE_URL=http://litellm_main:4000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
