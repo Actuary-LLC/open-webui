@@ -29,8 +29,8 @@ jobs:
       - name: Create Docker secret
         env:
           OPENAI_API_KEY: ${{ secrets.LITELLM_MASTER_KEY }}
-          OAUTH_CLIENT_ID: ${{ vars.GOOGLE_OAUTH_ID }}
-          OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_SECRET }}
+          OAUTH_CLIENT_ID: ${{ vars.AUTHENTIK_OAUTH_CLIENT_ID }}
+          OAUTH_CLIENT_SECRET: ${{ secrets.AUTHENTIK_OAUTH_CLIENT_SECRET }}
           WEBUI_SECRET_KEY: ${{ secrets.WEBUI_SECRET_KEY }}
         run: |
           cat <<EOF > /tmp/secrets.env
