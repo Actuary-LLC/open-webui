@@ -1,9 +1,5 @@
 version: "3.8"
 
-secrets:
-  open_webui:
-    external: true
-
 networks:
   reverse-proxy:
     external: true
