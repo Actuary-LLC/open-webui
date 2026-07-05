@@ -16,8 +16,6 @@ services:
     networks:
       - reverse-proxy
       - litellm
-    ports:
-      - "3001:8080"
     deploy:
       labels:
         - "traefik.enable=true"
