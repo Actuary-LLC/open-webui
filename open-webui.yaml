@@ -12,6 +12,7 @@ networks:
 
 services:
   main:
+    #https://github.com/open-webui/open-webui/releases
     image: ghcr.io/open-webui/open-webui:0.10.2
     networks:
       - reverse-proxy
