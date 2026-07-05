@@ -43,12 +43,9 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        while IFS= read -r line; do
-          case "$line" in
-            \#*|"") continue ;;
-          esac
-          export "$line"
-        done < /run/secrets/open_webui
+        set -a
+        . /run/secrets/open_webui
+        set +a
         exec /app/backend/start.sh
     volumes:
       - /mnt/user/docker/volumes/open-webui:/app/backend/data
