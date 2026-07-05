@@ -30,6 +30,7 @@ services:
     environment:
       - OPENAI_API_BASE_URL=http://litellm_main:4000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - WEBUI_AUTH_TRUSTED_HEADER=true
       #- WEBUI_URL=https://openwebui.actuary.dev
       - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
       - ENABLE_LOGIN_FORM=false
