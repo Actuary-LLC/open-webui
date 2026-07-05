@@ -11,7 +11,8 @@ on:
 env:
   STACK_NAME: openwebui
   SERVICE_NAME: openwebui_main
-
+  OPENAI_API_KEY: ${{ secrets.LITELLM_MASTER_KEY }}
+  WEBUI_SECRET_KEY: ${{ secrets.WEBUI_SECRET_KEY }}
 jobs:
   deploy:
     runs-on: coral
