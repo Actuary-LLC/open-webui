@@ -45,7 +45,7 @@ services:
     command:
       - |
         set -a
-        . /run/secrets/open_webui_*
+        . /run/secrets/open_webui
         set +a
         exec /app/backend/start.sh
     volumes:
