@@ -10,8 +10,7 @@ on:
 
 env:
   STACK_NAME: openwebui
-  SERVICE_NAME: openwebui_main   
-  SECRETS_PREFIX: open_webui  
+  SERVICE_NAME: openwebui_main
 
 jobs:
   deploy:
@@ -20,49 +19,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Versioned secret name
-        id: ver
-        run: |
-          SHA="${GITHUB_SHA::7}"
-          echo "name=${SECRETS_PREFIX}_${SHA}" >> "$GITHUB_OUTPUT"
-
-      # ── Create the Docker secret ──
-      - name: Create Docker secret
-        env:
-          OPENAI_API_KEY: ${{ secrets.LITELLM_MASTER_KEY }}
-          OAUTH_CLIENT_ID: ${{ vars.AUTHENTIK_OAUTH_CLIENT_ID }}
-          OAUTH_CLIENT_SECRET: ${{ secrets.AUTHENTIK_OAUTH_CLIENT_SECRET }}
-          WEBUI_SECRET_KEY: ${{ secrets.WEBUI_SECRET_KEY }}
-        run: |
-          cat <<EOF > /tmp/secrets.env
-          OPENAI_API_KEY=${OPENAI_API_KEY}
-          OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}
-          OAUTH_CLIENT_SECRET=${OAUTH_CLIENT_SECRET}
-          WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
-          EOF
-          sed -i 's/^[[:space:]]*//' /tmp/secrets.env
-
-          docker secret create \
-            "${{ steps.ver.outputs.name }}" \
-            /tmp/secrets.env 2>/dev/null || true
-
-          shred -u /tmp/secrets.env
-
-      # ── Deploy ──
-      # Uses "docker stack deploy" which handles both:
-      #   - First deploy (service doesn't exist yet)
-      #   - Updates (service already running)
-      # The sed replaces the placeholder secret name in the yaml
-      # with the versioned one we just created.
       - name: Deploy stack
         run: |
-          sed -i "s/open_webui/${{ steps.ver.outputs.name }}/g" \
-            open-webui.yaml
-
           docker stack deploy \
             -c open-webui.yaml \
             "$STACK_NAME"
-      # ── Wait ──
+
       - name: Wait for convergence
         run: |
           for i in $(seq 1 30); do
@@ -71,21 +33,13 @@ jobs:
               --format "{{.Replicas}}")
             [ "$REPLICAS" = "1/1" ] && echo "✅ Done" && exit 0
             echo "Waiting... ($i/30) — $REPLICAS"
+            if [ "$i" -eq 5 ] || [ $((i % 10)) -eq 0 ]; then
+              docker service ps "${STACK_NAME}_${SERVICE_NAME}" --no-trunc --filter "desired-state=running" 2>/dev/null || true
+              docker service logs --tail 30 "${STACK_NAME}_${SERVICE_NAME}" 2>/dev/null || true
+            fi
             sleep 5
           done
-          docker service rollback "$SERVICE_NAME"
+          echo "--- Final logs ---"
+          docker service logs --tail 50 "${STACK_NAME}_${SERVICE_NAME}" 2>/dev/null || true
+          docker service rollback "${STACK_NAME}_${SERVICE_NAME}"
           exit 1
-
-      # ── Prune ──
-      - name: Prune old secrets
-        if: always()
-        run: |
-          docker secret ls \
-            --filter "name=${SECRETS_PREFIX}_" \
-            --format "{{.ID}} {{.CreatedAt}}" \
-          | sort -k2 -r \
-          | tail -n +3 \
-          | awk '{print $1}' \
-          | while read -r id; do
-              docker secret rm "$id" 2>/dev/null || true
-            done
