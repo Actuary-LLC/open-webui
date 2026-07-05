@@ -19,12 +19,13 @@ services:
       - litellm
     deploy:
       labels:
-        - "traefik.enable=true"
+        - "traefik.enable=true"    
         - "traefik.http.routers.openwebui.rule=Host(`openwebui.actuary.dev`)"
         - "traefik.http.routers.openwebui.entrypoints=websecure"
         - "traefik.http.routers.openwebui.service=openwebui"
         - "traefik.http.routers.openwebui.tls.certresolver=myresolver"
         - "traefik.http.services.openwebui.loadbalancer.server.port=8080"
+        - "traefik.http.routers.openwebui.middlewares=authentik"
       update_config:
         order: start-first
         parallelism: 1
@@ -35,19 +36,11 @@ services:
     environment:
       - OPENAI_API_BASE_URL=http://litellm_main:4000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OAUTH_PROVIDER_NAME=authentik
-      - OPENID_PROVIDER_URL=https://authentik.actuary.dev/application/o/openweb-ui/.well-known/openid-configuration
-      - OPENID_REDIRECT_URI=https://openwebui.actuary.dev/oauth/oidc/callback
       - WEBUI_URL=https://openwebui.actuary.dev
-      - ENABLE_OAUTH_SIGNUP=true
       - ENABLE_LOGIN_FORM=false
-      - OAUTH_MERGE_ACCOUNTS_BY_EMAIL=true
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        set -a
-        . /run/secrets/open_webui
-        set +a
         exec /app/backend/start.sh
     volumes:
       - /mnt/user/docker/volumes/open-webui:/app/backend/data
