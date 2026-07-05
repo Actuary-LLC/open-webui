@@ -34,6 +34,7 @@ services:
       - open_webui
     environment:
       - OPENAI_API_BASE_URL=http://litellm_main:4000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OAUTH_PROVIDER_NAME=authentik
       - OPENID_PROVIDER_URL=https://authentik.actuary.dev/application/o/openweb-ui/.well-known/openid-configuration
       - OPENID_REDIRECT_URI=https://openwebui.actuary.dev/oauth/oidc/callback
