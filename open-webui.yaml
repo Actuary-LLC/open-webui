@@ -43,9 +43,7 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        set -a
-        . /run/secrets/open_webui
-        set +a
+        export $(grep -v '^#' /run/secrets/open_webui_* | grep -v '^$' | xargs)
         exec /app/backend/start.sh
     volumes:
       - /mnt/user/docker/volumes/open-webui:/app/backend/data
