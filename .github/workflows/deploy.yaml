@@ -6,6 +6,7 @@ on:
     paths:
       - "open-webui.yaml"
       - ".github/workflows/deploy.yaml"
+  workflow_dispatch:
 
 env:
   STACK_NAME: openwebui
