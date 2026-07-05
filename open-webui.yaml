@@ -36,11 +36,8 @@ services:
     environment:
       - OPENAI_API_BASE_URL=http://litellm_main:4000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - WEBUI_URL=https://openwebui.actuary.dev
+      #- WEBUI_URL=https://openwebui.actuary.dev
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
       - ENABLE_LOGIN_FORM=false
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        exec /app/backend/start.sh
     volumes:
       - /mnt/user/docker/volumes/open-webui:/app/backend/data
