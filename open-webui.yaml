@@ -20,7 +20,7 @@ services:
         - "traefik.http.routers.openwebui.service=openwebui"
         - "traefik.http.routers.openwebui.tls.certresolver=myresolver"
         - "traefik.http.services.openwebui.loadbalancer.server.port=8080"
-        - "traefik.http.routers.openwebui.middlewares=authentik_server-authentik@swarm"
+        - "traefik.http.routers.openwebui.middlewares=authentik@swarm"
     environment:
       - OPENAI_API_BASE_URL=http://litellm_main:4000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
