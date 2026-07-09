@@ -5,34 +5,36 @@ networks:
     external: true
   litellm:
     external: true
-
 services:
   main:
-    #https://github.com/open-webui/open-webui/releases
     image: ghcr.io/open-webui/open-webui:0.10.2
     networks:
       - reverse-proxy
       - litellm
     deploy:
       labels:
-        - "traefik.enable=true"    
+        - "traefik.enable=true"
         - "traefik.http.routers.openwebui.rule=Host(`openwebui.actuary.dev`)"
         - "traefik.http.routers.openwebui.entrypoints=websecure"
         - "traefik.http.routers.openwebui.service=openwebui"
         - "traefik.http.routers.openwebui.tls.certresolver=myresolver"
         - "traefik.http.services.openwebui.loadbalancer.server.port=8080"
-        - "traefik.http.routers.openwebui.middlewares=authentik"
-      update_config:
-        order: start-first
-        parallelism: 1
-        failure_action: rollback
-        delay: 10s
+        - "traefik.http.routers.openwebui.middlewares=authentik@file"
+        - "traefik.http.middlewares.authentik.forwardauth.address=http://authentik-server:9000/outpost.goauthentik.io/auth/traefik"
+        - "traefik.http.middlewares.authentik.forwardauth.trustForwardHeader=true"
+        - "traefik.http.middlewares.authentik.forwardauth.authResponseHeaders=X-authentik-username,X-authentik-email,X-authentik-name,X-authentik-uid"
+    update_config:
+      order: start-first
+      parallelism: 1
+      failure_action: rollback
+      delay: 10s
     environment:
       - OPENAI_API_BASE_URL=http://litellm_main:4000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - WEBUI_AUTH_TRUSTED_HEADER=true
       - WEBUI_URL=https://openwebui.actuary.dev
       - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
+      - WEBUI_AUTH_TRUSTED_HEADER=true
+      - WEBUI_AUTH_TRUSTED_HEADER_NAME=X-authentik-username
       - ENABLE_LOGIN_FORM=false
     volumes:
       - /mnt/user/docker/volumes/open-webui:/app/backend/data
