@@ -21,6 +21,9 @@ services:
         - "traefik.http.routers.openwebui.tls.certresolver=myresolver"
         - "traefik.http.services.openwebui.loadbalancer.server.port=8080"
         - "traefik.http.routers.openwebui.middlewares=authentik@swarm"
+        - "diun.enable=true"
+        - "diun.watch_repo=true"
+        - "diun.include_tags=^\d+\.0\.0$"
     environment:
       - OPENAI_API_BASE_URL=http://litellm_main:4000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
