@@ -15,10 +15,7 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        # Router 1: Authenticated (browser) - everything except API
-        - "traefik.http.routers.openwebui.rule=Host(`openwebui.actuary.dev`) && !PathPrefix(`/api`) && !PathPrefix(`/v1`) && !PathPrefix(`/ws`)"
-        # Router 2: API/WS - no auth middleware
-        - "traefik.http.routers.openwebui-api.rule=Host(`openwebui.actuary.dev`) && (PathPrefix(`/api`) || PathPrefix(`/v1`) || PathPrefix(`/ws`))"
+        - "traefik.http.routers.openwebui.rule=Host(`openwebui.actuary.dev`)
         - "traefik.http.routers.openwebui.entrypoints=websecure"
         - "traefik.http.routers.openwebui.service=openwebui"
         - "traefik.http.routers.openwebui.tls.certresolver=myresolver"
