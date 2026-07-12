@@ -15,7 +15,7 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.openwebui.rule=Host(`openwebui.actuary.dev`)
+        - "traefik.http.routers.openwebui.rule=Host(`openwebui.actuary.dev`)"
         - "traefik.http.routers.openwebui.entrypoints=websecure"
         - "traefik.http.routers.openwebui.service=openwebui"
         - "traefik.http.routers.openwebui.tls.certresolver=myresolver"
