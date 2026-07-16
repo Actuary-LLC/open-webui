@@ -15,12 +15,19 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
+        # Main web UI (with Authentik auth)
         - "traefik.http.routers.openwebui.rule=Host(`openwebui.actuary.dev`)"
         - "traefik.http.routers.openwebui.entrypoints=websecure"
         - "traefik.http.routers.openwebui.service=openwebui"
         - "traefik.http.routers.openwebui.tls.certresolver=myresolver"
         - "traefik.http.services.openwebui.loadbalancer.server.port=8080"
         - "traefik.http.routers.openwebui.middlewares=authentik@swarm"
+        # API route (no Authentik auth - for Conduit and other API clients)
+        - "traefik.http.routers.openwebui-api.rule=Host(`openwebui.actuary.dev`) && PathPrefix(`/api`)"
+        - "traefik.http.routers.openwebui-api.entrypoints=websecure"
+        - "traefik.http.routers.openwebui-api.service=openwebui"
+        - "traefik.http.routers.openwebui-api.tls.certresolver=myresolver"
+        - "traefik.http.routers.openwebui-api.priority=100"
     environment:
       - OPENAI_API_BASE_URL=http://litellm_main:4000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
