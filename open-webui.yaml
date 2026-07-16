@@ -31,5 +31,11 @@ services:
       - ENABLE_LOGIN_FORM=false
       - JWT_EXPIRES_IN=72h
       - WEBUI_AUTH_COOKIE_SECURE=true
+      # Web Search Configuration
+      - ENABLE_WEB_SEARCH=True
+      - WEB_SEARCH_ENGINE=searxng
+      - WEB_SEARCH_RESULT_COUNT=3
+      - WEB_SEARCH_CONCURRENT_REQUESTS=10
+      - SEARXNG_QUERY_URL=http://searxng_main:8080/search?q=<query>
     volumes:
       - /mnt/user/docker/volumes/open-webui:/app/backend/data
