@@ -25,6 +25,7 @@ services:
         #- "traefik.http.middlewares.authentik.forwardauth.trustForwardHeader=true"
         #- "traefik.http.middlewares.authentik.forwardauth.authResponseHeaders=X-authentik-username,X-authentik-email,X-authentik-name,X-authentik-uid"
     environment:
+      - ENABLE_OAUTH_PERSISTENT_CONFIG=false
       - OPENAI_API_BASE_URL=http://litellm_main:4000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - WEBUI_URL=https://openwebui.actuary.dev
