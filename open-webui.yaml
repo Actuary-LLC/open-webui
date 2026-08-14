@@ -35,6 +35,12 @@ services:
       - ENABLE_LOGIN_FORM=false
       - JWT_EXPIRES_IN=72h
       - WEBUI_AUTH_COOKIE_SECURE=true
+      #OAUTH
+      - OAUTH_PROVIDER_NAME=authentik
+      - OPENID_PROVIDER_URL=https://authentik.actuary.dev/application/o/openwebui/.well-known/openid-configuration
+      - OPENID_REDIRECT_URI=https://openwebui.actuary.dev/oauth/oidc/callback
+      - ENABLE_PASSWORD_AUTH=false
+      - OAUTH_MERGE_ACCOUNTS_BY_EMAIL=true
       # Web Search Configuration
       - ENABLE_WEB_SEARCH=True
       - WEB_SEARCH_ENGINE=searxng
