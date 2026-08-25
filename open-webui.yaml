@@ -20,29 +20,22 @@ services:
         - "traefik.http.routers.openwebui.service=openwebui"
         - "traefik.http.routers.openwebui.tls.certresolver=myresolver"
         - "traefik.http.services.openwebui.loadbalancer.server.port=8080"
-        - "traefik.http.routers.openwebui.middlewares=authentik@swarm"
-        #- "traefik.http.middlewares.authentik.forwardauth.address=http://authentik-server:9000/outpost.goauthentik.io/auth/traefik"
-        #- "traefik.http.middlewares.authentik.forwardauth.trustForwardHeader=true"
-        #- "traefik.http.middlewares.authentik.forwardauth.authResponseHeaders=X-authentik-username,X-authentik-email,X-authentik-name,X-authentik-uid"
+        - "traefik.http.routers.openwebui.middlewares=authentik"
+        - "traefik.http.middlewares.authentik.forwardauth.address=http://authentik-server:9000/outpost.goauthentik.io/auth/traefik"
+        - "traefik.http.middlewares.authentik.forwardauth.trustForwardHeader=true"
+        - "traefik.http.middlewares.authentik.forwardauth.authResponseHeaders=X-authentik-username,X-authentik-email,X-authentik-name,X-authentik-uid"
     environment:
-      - ENABLE_OAUTH_PERSISTENT_CONFIG=false
       - OPENAI_API_BASE_URL=http://litellm_main:4000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - WEBUI_URL=https://openwebui.actuary.dev
       - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
-      #- WEBUI_AUTH_TRUSTED_EMAIL_HEADER=X-authentik-email
-      #- WEBUI_AUTH_TRUSTED_NAME_HEADER=X-authentik-name
-      - WEBUI_AUTH_TRUSTED_EMAIL_HEADER=X-Forwarded-Email
-      - WEBUI_AUTH_TRUSTED_NAME_HEADER=X-Forwarded-User
+      - WEBUI_AUTH_TRUSTED_EMAIL_HEADER=X-authentik-email
+      - WEBUI_AUTH_TRUSTED_NAME_HEADER=X-authentik-name
       - ENABLE_LOGIN_FORM=false
       - JWT_EXPIRES_IN=72h
       - WEBUI_AUTH_COOKIE_SECURE=true
-      #OAUTH
-      - OAUTH_PROVIDER_NAME=authentik
-      - OPENID_PROVIDER_URL=https://authentik.actuary.dev/application/o/openwebui/.well-known/openid-configuration
-      - OPENID_REDIRECT_URI=https://openwebui.actuary.dev/oauth/oidc/callback
-      - ENABLE_PASSWORD_AUTH=false
-      - OAUTH_MERGE_ACCOUNTS_BY_EMAIL=true
+      - ENABLE_OAUTH=false
+      - HOST=127.0.0.1
       # Web Search Configuration
       - ENABLE_WEB_SEARCH=True
       - WEB_SEARCH_ENGINE=searxng
