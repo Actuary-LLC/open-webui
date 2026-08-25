@@ -35,7 +35,6 @@ services:
       - JWT_EXPIRES_IN=72h
       - WEBUI_AUTH_COOKIE_SECURE=true
       - ENABLE_OAUTH=false
-      - HOST=127.0.0.1
       # Web Search Configuration
       - ENABLE_WEB_SEARCH=True
       - WEB_SEARCH_ENGINE=searxng
