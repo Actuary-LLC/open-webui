@@ -21,7 +21,7 @@ services:
         - "traefik.http.routers.openwebui.tls.certresolver=myresolver"
         - "traefik.http.services.openwebui.loadbalancer.server.port=8080"
         - "traefik.http.routers.openwebui.middlewares=openwebui-auth"
-        - "traefik.http.middlewares.openwebui-auth.forwardauth.address=http://authentik_server:9000/outpost.goauthentik.io/auth/traefik"
+        - "traefik.http.middlewares.openwebui-auth.forwardauth.address=http://authentik_server:9000/outpost.goauthentik.io/auth/open-webui"
         - "traefik.http.middlewares.openwebui-auth.forwardauth.trustForwardHeader=true"
         - "traefik.http.middlewares.openwebui-auth.forwardauth.authResponseHeaders=X-authentik-username,X-authentik-email,X-authentik-name,X-authentik-uid"
     environment:
