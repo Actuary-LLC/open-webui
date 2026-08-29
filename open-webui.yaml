@@ -32,6 +32,7 @@ services:
       - WEBUI_AUTH_TRUSTED_EMAIL_HEADER=X-authentik-email
       - WEBUI_AUTH_TRUSTED_NAME_HEADER=X-authentik-name
       - WEBUI_AUTH_TRUSTED_USERNAME_HEADER=X-authentik-username
+      - ENABLE_PERSISTENT_CONFIG=false
       - ENABLE_LOGIN_FORM=false
       - ENABLE_OAUTH_SIGNUP=false
       - JWT_EXPIRES_IN=72h
