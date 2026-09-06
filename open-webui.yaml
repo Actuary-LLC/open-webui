@@ -8,7 +8,7 @@ networks:
 
 services:
   main:
-    image: ghcr.io/open-webui/open-webui:0.11.1
+    image: ghcr.io/open-webui/open-webui:0.11.3
     networks:
       - reverse-proxy
       - litellm
@@ -36,9 +36,16 @@ services:
       - WEBUI_AUTH_COOKIE_SECURE=true
       # Web Search Configuration
       - ENABLE_WEB_SEARCH=True
-      - WEB_SEARCH_ENGINE=searxng
-      - WEB_SEARCH_RESULT_COUNT=3
-      - WEB_SEARCH_CONCURRENT_REQUESTS=10
-      - SEARXNG_QUERY_URL=http://searxng_main:8080/search?q=<query>
+      - ENABLE_WEB_SEARCH_CONFIRMATION=True
+      # Brave
+      - WEB_SEARCH_ENGINE=brave
+      - BRAVE_SEARCH_API_KEY=${BRAVE_SEARCH_API_KEY}
+      - BRAVE_SEARCH_CONTEXT_TOKENS=8192
+      - WEB_SEARCH_CONCURRENT_REQUESTS=1
+      # SearXNG
+      #- WEB_SEARCH_ENGINE=searxng
+      #- WEB_SEARCH_RESULT_COUNT=3
+      #- WEB_SEARCH_CONCURRENT_REQUESTS=10
+      #- SEARXNG_QUERY_URL=http://searxng_main:8080/search?q=<query>
     volumes:
       - /mnt/user/docker/volumes/open-webui:/app/backend/data
