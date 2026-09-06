@@ -13,6 +13,7 @@ env:
   SERVICE_NAME: openwebui_main
   OPENAI_API_KEY: ${{ secrets.LITELLM_MASTER_KEY }}
   WEBUI_SECRET_KEY: ${{ secrets.WEBUI_SECRET_KEY }}
+  BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
 jobs:
   deploy:
     runs-on: coral
