@@ -15,12 +15,21 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
+        # ── Main router: forward auth for browser SSO ──
         - "traefik.http.routers.openwebui.rule=Host(`openwebui.actuary.dev`)"
         - "traefik.http.routers.openwebui.entrypoints=websecure"
         - "traefik.http.routers.openwebui.service=openwebui"
         - "traefik.http.routers.openwebui.tls.certresolver=myresolver"
-        - "traefik.http.services.openwebui.loadbalancer.server.port=8080"
         - "traefik.http.routers.openwebui.middlewares=authentik@file"
+        # ── API bypass router: app/API key auth, NO forward auth ──
+        # Matches requests that already carry an Authorization header,
+        # so they skip the Authentik middleware and go straight to OpenWebUI
+        - "traefik.http.routers.openwebui-api.rule=Host(`openwebui.actuary.dev`) && HeadersRegexp(`Authorization`, `.+`)"
+        - "traefik.http.routers.openwebui-api.entrypoints=websecure"
+        - "traefik.http.routers.openwebui-api.service=openwebui"
+        - "traefik.http.routers.openwebui-api.tls.certresolver=myresolver"
+        # Note: NO middlewares on openwebui-api — requests go directly to OpenWebUI
+        - "traefik.http.services.openwebui.loadbalancer.server.port=8080"
     environment:
       - OPENAI_API_BASE_URL=http://litellm_main:4000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -30,10 +39,21 @@ services:
       - WEBUI_AUTH_TRUSTED_NAME_HEADER=X-authentik-name
       - WEBUI_AUTH_TRUSTED_USERNAME_HEADER=X-authentik-username
       - ENABLE_PERSISTENT_CONFIG=false
-      - ENABLE_LOGIN_FORM=false
-      - ENABLE_OAUTH_SIGNUP=false
+      - ENABLE_LOGIN_FORM=true
+      - ENABLE_OAUTH_SIGNUP=true
+      - OAUTH_MERGE_ACCOUNTS_BY_EMAIL=true
       - JWT_EXPIRES_IN=72h
       - WEBUI_AUTH_COOKIE_SECURE=true
+      # ── Authentik OIDC (for app OAuth flow) ──
+      # Browsers get SSO via forward auth middleware — they never see this.
+      # Apps that bypass forward auth hit OpenWebUI directly and can use
+      # either API keys or the OIDC flow through Authentik.
+      - OAUTH_PROVIDER_NAME=Authentik
+      - OPENID_PROVIDER_URL=https://authentik.actuary.dev/application/o/open-webui/.well-known/openid-configuration
+      - OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}
+      - OAUTH_CLIENT_SECRET=${OAUTH_CLIENT_SECRET}
+      - OAUTH_SCOPES=openid email profile
+      - OAUTH_CODE_CHALLENGE_METHOD=S256
       # Web Search Configuration
       - ENABLE_WEB_SEARCH=True
       - ENABLE_WEB_SEARCH_CONFIRMATION=True
