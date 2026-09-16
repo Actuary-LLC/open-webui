@@ -20,20 +20,37 @@ services:
         - "traefik.http.routers.openwebui.service=openwebui"
         - "traefik.http.routers.openwebui.tls.certresolver=myresolver"
         - "traefik.http.services.openwebui.loadbalancer.server.port=8080"
-        - "traefik.http.routers.openwebui.middlewares=authentik@file"
+        # REMOVED: authentik@file forward auth middleware
+        # OpenWebUI now handles auth directly via OIDC
     environment:
       - OPENAI_API_BASE_URL=http://litellm_main:4000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - WEBUI_URL=https://openwebui.actuary.dev
       - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
-      - WEBUI_AUTH_TRUSTED_EMAIL_HEADER=X-authentik-email
-      - WEBUI_AUTH_TRUSTED_NAME_HEADER=X-authentik-name
-      - WEBUI_AUTH_TRUSTED_USERNAME_HEADER=X-authentik-username
       - ENABLE_PERSISTENT_CONFIG=false
       - ENABLE_LOGIN_FORM=false
-      - ENABLE_OAUTH_SIGNUP=false
       - JWT_EXPIRES_IN=72h
       - WEBUI_AUTH_COOKIE_SECURE=true
+
+      # -------------------------------------------------------
+      # Authentik OIDC Configuration
+      # All logins go through Authentik — works for both
+      # browsers and native apps
+      # -------------------------------------------------------
+      - ENABLE_OAUTH_SIGNUP=true
+      - OAUTH_MERGE_ACCOUNTS_BY_EMAIL=true
+      - OAUTH_PROVIDER_NAME=Authentik
+      - OPENID_PROVIDER_URL=https://authentik.actuary.dev/application/o/open-webui/.well-known/openid-configuration
+      - OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}
+      - OAUTH_CLIENT_SECRET=${OAUTH_CLIENT_SECRET}
+      - OAUTH_SCOPES=openid email profile
+      - OAUTH_CODE_CHALLENGE_METHOD=S256
+
+      # REMOVED: Trusted header variables (no longer needed with OIDC)
+      # - WEBUI_AUTH_TRUSTED_EMAIL_HEADER=X-authentik-email
+      # - WEBUI_AUTH_TRUSTED_NAME_HEADER=X-authentik-name
+      # - WEBUI_AUTH_TRUSTED_USERNAME_HEADER=X-authentik-username
+
       # Web Search Configuration
       - ENABLE_WEB_SEARCH=True
       - ENABLE_WEB_SEARCH_CONFIRMATION=True
