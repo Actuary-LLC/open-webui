@@ -36,7 +36,7 @@ services:
       - WEBUI_AUTH_COOKIE_SECURE=true
       # Web Search Configuration
       - ENABLE_WEB_SEARCH=True
-      - ENABLE_WEB_SEARCH_CONFIRMATION=True
+      #- ENABLE_WEB_SEARCH_CONFIRMATION=True
       # Brave
       - WEB_SEARCH_ENGINE=brave
       - BRAVE_SEARCH_API_KEY=${BRAVE_SEARCH_API_KEY}
