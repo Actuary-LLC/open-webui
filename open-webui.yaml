@@ -8,7 +8,7 @@ networks:
 
 services:
   main:
-    image: ghcr.io/open-webui/open-webui:0.12.3
+    image: ghcr.io/open-webui/open-webui:0.13.0
     networks:
       - reverse-proxy
       - litellm
@@ -39,6 +39,7 @@ services:
       - ENABLE_LOGIN_FORM=false
       - JWT_EXPIRES_IN=72h
       - WEBUI_AUTH_COOKIE_SECURE=true
+      - DEFAULT_USER_ROLE=user
       # Web Search Configuration
       - ENABLE_WEB_SEARCH=True
       #- ENABLE_WEB_SEARCH_CONFIRMATION=True
