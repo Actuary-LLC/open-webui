@@ -39,6 +39,7 @@ services:
       - ENABLE_LOGIN_FORM=false
       - JWT_EXPIRES_IN=72h
       - WEBUI_AUTH_COOKIE_SECURE=true
+      - DEFAULT_USER_ROLE=user
       # Web Search Configuration
       - ENABLE_WEB_SEARCH=True
       #- ENABLE_WEB_SEARCH_CONFIRMATION=True
