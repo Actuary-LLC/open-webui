@@ -28,7 +28,9 @@ services:
       # OIDC SSO (Authentik)
       - OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}
       - OAUTH_CLIENT_SECRET=${OAUTH_CLIENT_SECRET}
-      - OPENID_PROVIDER_URL=${OPENID_PROVIDER_URL}
+      - OPENID_PROVIDER_URL=https://authentik.actuary.dev/application/o/open-webui/.well-known/openid-configuration
+      - OPENID_REDIRECT_URI=https://openwebui.actuary.dev/oauth/oidc/callback
+      - OAUTH_CODE_CHALLENGE_METHOD=S256
       - OAUTH_PROVIDER_NAME=Authentik
       - ENABLE_OAUTH_SIGNUP=true
       - OAUTH_MERGE_ACCOUNTS_BY_EMAIL=true

@@ -14,12 +14,23 @@ env:
   OPENAI_API_KEY: ${{ secrets.LITELLM_MASTER_KEY }}
   WEBUI_SECRET_KEY: ${{ secrets.WEBUI_SECRET_KEY }}
   BRAVE_SEARCH_API_KEY: ${{ secrets.BRAVE_SEARCH_API_KEY }}
+  # OIDC SSO (Authentik) — required for the sign-in page to render an SSO button.
+  # Names match the pre-existing GitHub variable/secret from earlier deploy.yaml revisions.
+  OAUTH_CLIENT_ID: ${{ vars.AUTHENTIK_OAUTH_CLIENT_ID }}
+  OAUTH_CLIENT_SECRET: ${{ secrets.AUTHENTIK_OAUTH_CLIENT_SECRET }}
 jobs:
   deploy:
     runs-on: coral
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      - name: Verify required OIDC credentials
+        run: |
+          ok=1
+          [ -n "$OAUTH_CLIENT_ID" ] || { echo "❌ vars.AUTHENTIK_OAUTH_CLIENT_ID is empty — add it as a repository variable."; ok=0; }
+          [ -n "$OAUTH_CLIENT_SECRET" ] || { echo "❌ secrets.AUTHENTIK_OAUTH_CLIENT_SECRET is empty — add it as a repository secret."; ok=0; }
+          [ "$ok" = 1 ] || { echo "Without these Open WebUI registers no SSO provider and the login page has no button."; exit 1; }
 
       - name: Deploy stack
         run: |
