@@ -8,7 +8,7 @@ networks:
 
 services:
   main:
-    image: ghcr.io/open-webui/open-webui:0.13.0
+    image: ghcr.io/open-webui/open-webui:0.12.4
     networks:
       - reverse-proxy
       - litellm
